@@ -1,7 +1,7 @@
-import { CreateUserUseCase } from '@/application/use-cases/create-user';
-import { GetAllUsersUseCase } from '@/application/use-cases/get-all-users';
-import { GetUserByIdUseCase } from '@/application/use-cases/get-user-by-id';
-import { UpdateUserUseCase } from '@/application/use-cases/update-user';
+import { CreateUserUseCase } from '@/domain/users/application/use-cases/create-user';
+import { GetAllUsersUseCase } from '@/domain/users/application/use-cases/get-all-users';
+import { GetUserByIdUseCase } from '@/domain/users/application/use-cases/get-user-by-id';
+import { UpdateUserUseCase } from '@/domain/users/application/use-cases/update-user';
 import { Body, Controller, Get, Param, Post, Put } from '@nestjs/common';
 import { UserViewModel } from '../view-models/user-view-model';
 

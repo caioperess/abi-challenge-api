@@ -1,0 +1,19 @@
+import { CreateUserUseCase } from '@/domain/users/application/use-cases/create-user';
+import { GetAllUsersUseCase } from '@/domain/users/application/use-cases/get-all-users';
+import { GetUserByIdUseCase } from '@/domain/users/application/use-cases/get-user-by-id';
+import { UpdateUserUseCase } from '@/domain/users/application/use-cases/update-user';
+import { Module } from '@nestjs/common';
+import { DatabaseModule } from '../database/database.module';
+import { UsersController } from './controllers/users-controller';
+
+@Module({
+  imports: [DatabaseModule],
+  controllers: [UsersController],
+  providers: [
+    GetAllUsersUseCase,
+    GetUserByIdUseCase,
+    UpdateUserUseCase,
+    CreateUserUseCase,
+  ],
+})
+export class HttpModule {}

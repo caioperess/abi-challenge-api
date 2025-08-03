@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { User } from '../entities/user';
 import { UsersRepository } from '../repositories/users-repository';
+import { UserNotFoundError } from './errors/user-not-found-error';
 
 interface UpdateUserUseCaseRequest {
   id: string;
@@ -24,7 +25,7 @@ export class UpdateUserUseCase {
     const user = await this.usersRepository.findById(id);
 
     if (!user) {
-      throw new Error('User not found');
+      throw new UserNotFoundError();
     }
 
     user.name = name;
