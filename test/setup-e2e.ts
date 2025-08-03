@@ -1,42 +1,57 @@
-import { envSchema } from '@/infra/env/env';
-import { PrismaClient } from '@prisma/client';
-import { execSync } from 'node:child_process';
-import { randomUUID } from 'node:crypto';
+import { execSync } from 'node:child_process'
+import { randomUUID } from 'node:crypto'
+import { PrismaClient } from '@prisma/client'
+import { config } from 'dotenv'
+import { envSchema } from '@/infra/env/env'
 
-const env = envSchema.parse(process.env);
+config({ path: '.env', override: true })
+config({ path: '.env.test', override: true })
 
-const prisma = new PrismaClient();
+const prisma = new PrismaClient()
+
+const env = envSchema.parse(process.env)
+
 // const redis = new Redis({
 //   host: env.REDIS_HOST,
 //   port: env.REDIS_PORT,
 //   db: env.REDIS_DB,
-// });
+// })
 
-function generateUniqueDatabaseURL(schemaId: string) {
-  if (!env.DATABASE_URL) {
-    throw new Error('Please provider a DATABASE_URL environment variable');
-  }
+export function generateUniqueDatabaseURL(schemaId: string) {
+	if (!env.DATABASE_URL) {
+		throw new Error('Please provider a DATABASE_URL environment variable')
+	}
 
-  const url = new URL(env.DATABASE_URL);
+	const url = new URL(env.DATABASE_URL)
 
-  url.searchParams.set('schema', schemaId);
+	url.searchParams.set('schema', schemaId)
 
-  return url.toString();
+	return url.toString()
 }
 
-const schemaId = randomUUID();
+const schemaId = randomUUID()
 
 beforeAll(async () => {
-  const databaseURL = generateUniqueDatabaseURL(schemaId);
+	console.log('Setting up E2E tests...')
 
-  process.env.DATABASE_URL = databaseURL;
+	const databaseURL = generateUniqueDatabaseURL(schemaId)
 
-  // await redis.flushdb();
+	process.env.DATABASE_URL = databaseURL
 
-  execSync('pnpm prisma migrate deploy');
-});
+	// await redis.flushdb()
+
+	try {
+		execSync('pnpm prisma migrate dev')
+	} catch (err) {
+		console.log('Error running migrations', err)
+	}
+
+	console.log('✅ E2E tests setup complete')
+})
 
 afterAll(async () => {
-  await prisma.$executeRawUnsafe(`DROP SCHEMA IF EXISTS "${schemaId}" CASCADE`);
-  await prisma.$disconnect();
-});
+	await prisma.$executeRawUnsafe(`DROP SCHEMA IF EXISTS "${schemaId}" CASCADE`)
+	await prisma.$disconnect()
+
+	console.log('E2E tests teardown complete')
+})

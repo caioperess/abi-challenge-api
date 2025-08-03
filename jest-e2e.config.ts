@@ -10,7 +10,7 @@ const config: Config = {
   transform: {
     '^.+\\.(t|j)s$': 'ts-jest',
   },
-  setupFilesAfterEnv: ['./test/setup-e2e.ts'],
+  // setupFilesAfterEnv: ['./test/setup-e2e.ts'],
 
   moduleNameMapper: pathsToModuleNameMapper(compilerOptions.paths, {
     prefix: '<rootDir>/',

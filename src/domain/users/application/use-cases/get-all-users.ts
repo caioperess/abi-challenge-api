@@ -1,18 +1,18 @@
-import { Injectable } from '@nestjs/common';
-import { User } from '@prisma/client';
-import { UsersRepository } from '../repositories/users-repository';
+import { Injectable } from '@nestjs/common'
+import { User } from '@prisma/client'
+import { UsersRepository } from '../repositories/users-repository'
 
 interface GetAllUsersUseCaseResponse {
-  users: User[];
+	users: User[]
 }
 
 @Injectable()
 export class GetAllUsersUseCase {
-  constructor(private readonly usersRepository: UsersRepository) {}
+	constructor(private readonly usersRepository: UsersRepository) {}
 
-  async execute(): Promise<GetAllUsersUseCaseResponse> {
-    const users = await this.usersRepository.findAll();
+	async execute(): Promise<GetAllUsersUseCaseResponse> {
+		const users = await this.usersRepository.findAll()
 
-    return { users };
-  }
+		return { users }
+	}
 }

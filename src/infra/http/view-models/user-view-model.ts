@@ -1,11 +1,11 @@
-import { User } from '@/domain/users/application/entities/user';
+import { User } from '@/domain/users/application/entities/user'
 
 export class UserViewModel {
-  static toHTTP(user: User) {
-    return {
-      id: user.id,
-      name: user.name,
-      email: user.email,
-    };
-  }
+	static toHTTP(user: User) {
+		return {
+			id: user.id,
+			name: user.name,
+			email: user.email,
+		}
+	}
 }

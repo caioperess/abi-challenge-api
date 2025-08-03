@@ -1,39 +1,35 @@
-import { Injectable } from '@nestjs/common';
-import { User } from '../entities/user';
-import { UsersRepository } from '../repositories/users-repository';
-import { UserNotFoundError } from './errors/user-not-found-error';
+import { Injectable } from '@nestjs/common'
+import { User } from '../entities/user'
+import { UsersRepository } from '../repositories/users-repository'
+import { UserNotFoundError } from './errors/user-not-found-error'
 
 interface UpdateUserUseCaseRequest {
-  id: string;
-  name: string;
-  email: string;
+	id: string
+	name: string
+	email: string
 }
 
 interface UpdateUserUseCaseResponse {
-  user: User;
+	user: User
 }
 
 @Injectable()
 export class UpdateUserUseCase {
-  constructor(private readonly usersRepository: UsersRepository) {}
+	constructor(private readonly usersRepository: UsersRepository) {}
 
-  async execute({
-    id,
-    name,
-    email,
-  }: UpdateUserUseCaseRequest): Promise<UpdateUserUseCaseResponse> {
-    const user = await this.usersRepository.findById(id);
+	async execute({ id, name, email }: UpdateUserUseCaseRequest): Promise<UpdateUserUseCaseResponse> {
+		const user = await this.usersRepository.findById(id)
 
-    if (!user) {
-      throw new UserNotFoundError();
-    }
+		if (!user) {
+			throw new UserNotFoundError()
+		}
 
-    user.name = name;
-    user.email = email;
-    user.updatedAt = new Date();
+		user.name = name
+		user.email = email
+		user.updatedAt = new Date()
 
-    await this.usersRepository.save(user);
+		await this.usersRepository.save(user)
 
-    return { user };
-  }
+		return { user }
+	}
 }
