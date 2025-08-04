@@ -1,5 +1,6 @@
 import { AuthenticateUserUseCase } from '@/domain/users/application/use-cases/authenticate';
 import { CreateUserUseCase } from '@/domain/users/application/use-cases/create-user';
+import { DeleteUserUseCase } from '@/domain/users/application/use-cases/delete-user';
 import { UserNotFoundError } from '@/domain/users/application/use-cases/errors/user-not-found-error';
 import { WrongCredentialsError } from '@/domain/users/application/use-cases/errors/wrong-credentials-error';
 import { GetAllUsersUseCase } from '@/domain/users/application/use-cases/get-all-users';
@@ -10,6 +11,7 @@ import {
   BadRequestException,
   Body,
   Controller,
+  Delete,
   Get,
   NotFoundException,
   Param,
@@ -17,7 +19,7 @@ import {
   Put,
   UnauthorizedException,
 } from '@nestjs/common';
-import { UserViewModel } from '../view-models/user-view-model';
+import { UserPresenter } from '../presenters/user-presenter';
 
 @Controller('users')
 export class UsersController {
@@ -26,6 +28,7 @@ export class UsersController {
     private readonly updateUserUseCase: UpdateUserUseCase,
     private readonly getAllUsersUseCase: GetAllUsersUseCase,
     private readonly getUserByIdUseCase: GetUserByIdUseCase,
+    private readonly deleteUserUseCase: DeleteUserUseCase,
     private readonly authenticateUserUseCase: AuthenticateUserUseCase,
   ) {}
 
@@ -35,7 +38,7 @@ export class UsersController {
       const { users } = await this.getAllUsersUseCase.execute();
 
       return {
-        users: users.map(UserViewModel.toHTTP),
+        users: users.map(UserPresenter.toHTTP),
       };
     } catch (err) {
       throw new BadRequestException(err.message);
@@ -48,7 +51,7 @@ export class UsersController {
       const { user } = await this.getUserByIdUseCase.execute({ id });
 
       return {
-        user: UserViewModel.toHTTP(user),
+        user: UserPresenter.toHTTP(user),
       };
     } catch (err) {
       if (err instanceof UserNotFoundError) {
@@ -71,7 +74,7 @@ export class UsersController {
       });
 
       return {
-        user: UserViewModel.toHTTP(user),
+        user: UserPresenter.toHTTP(user),
       };
     } catch (err) {
       if (err instanceof UserNotFoundError) {
@@ -82,7 +85,6 @@ export class UsersController {
     }
   }
 
-  @Public()
   @Post()
   async createUser(@Body() body: any) {
     try {
@@ -95,9 +97,26 @@ export class UsersController {
       });
 
       return {
-        user: UserViewModel.toHTTP(user),
+        user: UserPresenter.toHTTP(user),
       };
     } catch (err) {
+      throw new BadRequestException(err.message);
+    }
+  }
+
+  @Delete(':id')
+  async deleteUser(@Param('id') id: string) {
+    try {
+      await this.deleteUserUseCase.execute({ id });
+
+      return {
+        message: 'User deleted successfully',
+      };
+    } catch (err) {
+      if (err instanceof UserNotFoundError) {
+        throw new NotFoundException(err.message);
+      }
+
       throw new BadRequestException(err.message);
     }
   }
@@ -108,12 +127,13 @@ export class UsersController {
     try {
       const { email, password } = body;
 
-      const { accessToken } = await this.authenticateUserUseCase.execute({
+      const { user, accessToken } = await this.authenticateUserUseCase.execute({
         email,
         password,
       });
 
       return {
+        user: UserPresenter.toHTTP(user),
         accessToken,
       };
     } catch (err) {

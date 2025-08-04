@@ -1,81 +1,81 @@
-import { Injectable } from '@nestjs/common'
-import { User } from '@/domain/users/application/entities/user'
-import { UsersRepository } from '@/domain/users/application/repositories/users-repository'
-import { CacheRepository } from '@/infra/cache/cache-repository'
-import { PrismaUserMapper } from '../mappers/prisma-user-mapper'
-import { PrismaService } from '../prisma.service'
+import { User } from '@/domain/users/application/entities/user';
+import { UsersRepository } from '@/domain/users/application/repositories/users-repository';
+import { CacheRepository } from '@/infra/cache/cache-repository';
+import { Injectable } from '@nestjs/common';
+import { PrismaUserMapper } from '../mappers/prisma-user-mapper';
+import { PrismaService } from '../prisma.service';
 
 @Injectable()
 export class PrismaUsersRepository implements UsersRepository {
-	constructor(
-		private readonly prisma: PrismaService,
-		private readonly cache: CacheRepository,
-	) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly cache: CacheRepository,
+  ) {}
 
-	async create(user: User): Promise<void> {
-		const raw = PrismaUserMapper.toPrisma(user)
+  async create(user: User): Promise<void> {
+    const raw = PrismaUserMapper.toPrisma(user);
 
-		await this.prisma.user.create({
-			data: raw,
-		})
-	}
+    await this.prisma.user.create({
+      data: raw,
+    });
+  }
 
-	async findById(id: string): Promise<User | null> {
-		const cacheHit = await this.cache.get(`user:${id}`)
+  async findById(id: string): Promise<User | null> {
+    const cacheHit = await this.cache.get(`user:${id}`);
 
-		if (cacheHit) {
-			const cacheData = JSON.parse(cacheHit)
+    if (cacheHit) {
+      const cacheData = JSON.parse(cacheHit);
 
-			return cacheData
-		}
+      return PrismaUserMapper.toDomain(cacheData);
+    }
 
-		const user = await this.prisma.user.findUnique({ where: { id } })
+    const user = await this.prisma.user.findUnique({ where: { id } });
 
-		if (!user) {
-			return null
-		}
+    if (!user) {
+      return null;
+    }
 
-		const userDetails = PrismaUserMapper.toDomain(user)
+    await this.cache.set(`user:${id}`, JSON.stringify(user));
 
-		await this.cache.set(`user:${id}`, JSON.stringify(userDetails))
+    return PrismaUserMapper.toDomain(user);
+  }
 
-		return userDetails
-	}
+  async findByEmail(email: string): Promise<User | null> {
+    const user = await this.prisma.user.findFirst({ where: { email } });
 
-	async findByEmail(email: string): Promise<User | null> {
-		const user = await this.prisma.user.findFirst({ where: { email } })
+    if (!user) {
+      return null;
+    }
 
-		if (!user) {
-			return null
-		}
+    return PrismaUserMapper.toDomain(user);
+  }
 
-		return PrismaUserMapper.toDomain(user)
-	}
+  async findAll(): Promise<User[]> {
+    const users = await this.prisma.user.findMany();
 
-	async findAll(): Promise<User[]> {
-		const users = await this.prisma.user.findMany()
+    return users.map((user) => PrismaUserMapper.toDomain(user));
+  }
 
-		return users.map((user) => PrismaUserMapper.toDomain(user))
-	}
+  async delete(id: string): Promise<void> {
+    await this.prisma.user.delete({
+      where: {
+        id,
+      },
+    });
 
-	async delete(id: string): Promise<void> {
-		await this.prisma.user.delete({
-			where: {
-				id,
-			},
-		})
-	}
+    await this.cache.delete(`user:${id}`);
+  }
 
-	async save(user: User): Promise<void> {
-		const raw = PrismaUserMapper.toPrisma(user)
+  async save(user: User): Promise<void> {
+    const raw = PrismaUserMapper.toPrisma(user);
 
-		await this.prisma.user.update({
-			where: {
-				id: raw.id,
-			},
-			data: raw,
-		})
+    await this.prisma.user.update({
+      where: {
+        id: raw.id,
+      },
+      data: raw,
+    });
 
-		await this.cache.delete(`user:${raw.id}`)
-	}
+    await this.cache.delete(`user:${raw.id}`);
+  }
 }

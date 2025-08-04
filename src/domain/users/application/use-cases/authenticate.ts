@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Encrypter } from '../cryptography/encrypter';
 import { HashComparer } from '../cryptography/hash-comparer';
+import { User } from '../entities/user';
 import { UsersRepository } from '../repositories/users-repository';
 import { WrongCredentialsError } from './errors/wrong-credentials-error';
 
@@ -10,6 +11,7 @@ interface AuthenticateUserUseCaseRequest {
 }
 
 interface AuthenticateUserUseCaseResponse {
+  user: User;
   accessToken: string;
 }
 
@@ -44,6 +46,6 @@ export class AuthenticateUserUseCase {
       sub: user.id,
     });
 
-    return { accessToken };
+    return { user, accessToken };
   }
 }
