@@ -4,13 +4,13 @@ import { compilerOptions } from './tsconfig.json';
 
 const config: Config = {
   moduleFileExtensions: ['js', 'json', 'ts'],
-
-  testEnvironment: 'node',
   testRegex: '.e2e-spec.ts$',
   transform: {
     '^.+\\.(t|j)s$': 'ts-jest',
   },
-  // setupFilesAfterEnv: ['./test/setup-e2e.ts'],
+
+  testEnvironment: 'node',
+  setupFilesAfterEnv: ['./test/setup-e2e.ts'],
 
   moduleNameMapper: pathsToModuleNameMapper(compilerOptions.paths, {
     prefix: '<rootDir>/',

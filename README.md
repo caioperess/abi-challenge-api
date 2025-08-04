@@ -10,6 +10,7 @@
 
 - Have NodeJS 18+ installed in your system
 - Have PNPM as node package manager
+- Have Docker installed in your system
 
 **Clone the project and access the folder**
 
@@ -44,6 +45,9 @@ $ pnpm start
 ```bash
 # Run unity tests
 $ pnpm test
+
+# Before running e2e tests, make sure to run the migrations
+$ pnpm migrate dev
 
 # Run e2e tests
 $ pnpm test:e2e
