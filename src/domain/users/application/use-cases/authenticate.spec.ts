@@ -1,51 +1,47 @@
-import { FakeEncrypter } from '@test/cryptography/fake-encrypter';
-import { FakeHasher } from '@test/cryptography/fake-hasher';
-import { makeUser } from '@test/factories/make-user';
-import { InMemoryUsersRepository } from '@test/repositories/in-memory-users-repository';
-import { AuthenticateUserUseCase } from './authenticate';
-import { WrongCredentialsError } from './errors/wrong-credentials-error';
+import { FakeEncrypter } from '@test/cryptography/fake-encrypter'
+import { FakeHasher } from '@test/cryptography/fake-hasher'
+import { makeUser } from '@test/factories/make-user'
+import { InMemoryUsersRepository } from '@test/repositories/in-memory-users-repository'
+import { AuthenticateUserUseCase } from './authenticate'
+import { WrongCredentialsError } from './errors/wrong-credentials-error'
 
-let inMemoryUsersRepository: InMemoryUsersRepository;
-let fakeHasher: FakeHasher;
-let fakeEncrypter: FakeEncrypter;
-let sut: AuthenticateUserUseCase;
+let inMemoryUsersRepository: InMemoryUsersRepository
+let fakeHasher: FakeHasher
+let fakeEncrypter: FakeEncrypter
+let sut: AuthenticateUserUseCase
 
 describe('AuthenticateUserUseCase', () => {
-  beforeEach(() => {
-    inMemoryUsersRepository = new InMemoryUsersRepository();
-    fakeHasher = new FakeHasher();
-    fakeEncrypter = new FakeEncrypter();
+	beforeEach(() => {
+		inMemoryUsersRepository = new InMemoryUsersRepository()
+		fakeHasher = new FakeHasher()
+		fakeEncrypter = new FakeEncrypter()
 
-    sut = new AuthenticateUserUseCase(
-      inMemoryUsersRepository,
-      fakeHasher,
-      fakeEncrypter,
-    );
-  });
+		sut = new AuthenticateUserUseCase(inMemoryUsersRepository, fakeHasher, fakeEncrypter)
+	})
 
-  it('should be able to authenticate an user', async () => {
-    await inMemoryUsersRepository.create(
-      makeUser({
-        email: 'john.doe@example.com',
-        password: await fakeHasher.hash('123456'),
-      }),
-    );
+	it('should be able to authenticate an user', async () => {
+		await inMemoryUsersRepository.create(
+			makeUser({
+				email: 'john.doe@example.com',
+				password: await fakeHasher.hash('123456'),
+			}),
+		)
 
-    const result = await sut.execute({
-      email: 'john.doe@example.com',
-      password: '123456',
-    });
+		const result = await sut.execute({
+			email: 'john.doe@example.com',
+			password: '123456',
+		})
 
-    expect(result).toHaveProperty('accessToken');
-    expect(result).toHaveProperty('user');
-  });
+		expect(result).toHaveProperty('accessToken')
+		expect(result).toHaveProperty('user')
+	})
 
-  it('should not be able to authenticate an user with wrong credentials', async () => {
-    expect(() => {
-      return sut.execute({
-        email: 'john.doe@example.com',
-        password: '123456',
-      });
-    }).rejects.toBeInstanceOf(WrongCredentialsError);
-  });
-});
+	it('should not be able to authenticate an user with wrong credentials', async () => {
+		expect(() => {
+			return sut.execute({
+				email: 'john.doe@example.com',
+				password: '123456',
+			})
+		}).rejects.toBeInstanceOf(WrongCredentialsError)
+	})
+})

@@ -1,8 +1,8 @@
-import { z } from 'zod';
+import { z } from 'zod'
 
 export const updateUserSchema = z.object({
-  name: z.string(),
-  email: z.email(),
-});
+	name: z.string(),
+	email: z.email(),
+})
 
-export type UpdateUserSchema = z.infer<typeof updateUserSchema>;
+export type UpdateUserSchema = z.infer<typeof updateUserSchema>

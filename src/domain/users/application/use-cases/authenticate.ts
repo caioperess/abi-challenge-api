@@ -1,51 +1,45 @@
-import { Injectable } from '@nestjs/common';
-import { Encrypter } from '../cryptography/encrypter';
-import { HashComparer } from '../cryptography/hash-comparer';
-import { User } from '../entities/user';
-import { UsersRepository } from '../repositories/users-repository';
-import { WrongCredentialsError } from './errors/wrong-credentials-error';
+import { Injectable } from '@nestjs/common'
+import { Encrypter } from '../cryptography/encrypter'
+import { HashComparer } from '../cryptography/hash-comparer'
+import { User } from '../entities/user'
+import { UsersRepository } from '../repositories/users-repository'
+import { WrongCredentialsError } from './errors/wrong-credentials-error'
 
 interface AuthenticateUserUseCaseRequest {
-  email: string;
-  password: string;
+	email: string
+	password: string
 }
 
 interface AuthenticateUserUseCaseResponse {
-  user: User;
-  accessToken: string;
+	user: User
+	accessToken: string
 }
 
 @Injectable()
 export class AuthenticateUserUseCase {
-  constructor(
-    private readonly usersRepository: UsersRepository,
-    private readonly hashComparer: HashComparer,
-    private readonly encrypter: Encrypter,
-  ) {}
+	constructor(
+		private readonly usersRepository: UsersRepository,
+		private readonly hashComparer: HashComparer,
+		private readonly encrypter: Encrypter,
+	) {}
 
-  async execute({
-    email,
-    password,
-  }: AuthenticateUserUseCaseRequest): Promise<AuthenticateUserUseCaseResponse> {
-    const user = await this.usersRepository.findByEmail(email);
+	async execute({ email, password }: AuthenticateUserUseCaseRequest): Promise<AuthenticateUserUseCaseResponse> {
+		const user = await this.usersRepository.findByEmail(email)
 
-    if (!user) {
-      throw new WrongCredentialsError();
-    }
+		if (!user) {
+			throw new WrongCredentialsError()
+		}
 
-    const isPasswordValid = await this.hashComparer.compare(
-      password,
-      user.password,
-    );
+		const isPasswordValid = await this.hashComparer.compare(password, user.password)
 
-    if (!isPasswordValid) {
-      throw new WrongCredentialsError();
-    }
+		if (!isPasswordValid) {
+			throw new WrongCredentialsError()
+		}
 
-    const accessToken = await this.encrypter.encrypt({
-      sub: user.id,
-    });
+		const accessToken = await this.encrypter.encrypt({
+			sub: user.id,
+		})
 
-    return { user, accessToken };
-  }
+		return { user, accessToken }
+	}
 }
