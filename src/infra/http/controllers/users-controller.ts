@@ -19,7 +19,24 @@ import {
   Put,
   UnauthorizedException,
 } from '@nestjs/common';
+import { ZodValidationPipe } from '../pipes/zod-validation-pipe';
 import { UserPresenter } from '../presenters/user-presenter';
+import {
+  type AuthenticateSchema,
+  authenticateSchema,
+} from '../schemas/authenticate';
+import {
+  type CreateUserSchema,
+  createUserSchema,
+} from '../schemas/create-user';
+import {
+  type UpdateUserSchema,
+  updateUserSchema,
+} from '../schemas/update-user';
+
+const createUserValidationPipe = new ZodValidationPipe(createUserSchema);
+const updateUserValidationPipe = new ZodValidationPipe(updateUserSchema);
+const authenticateValidationPipe = new ZodValidationPipe(authenticateSchema);
 
 @Controller('users')
 export class UsersController {
@@ -63,7 +80,10 @@ export class UsersController {
   }
 
   @Put(':id')
-  async updateUser(@Param('id') id: string, @Body() body: any) {
+  async updateUser(
+    @Param('id') id: string,
+    @Body(updateUserValidationPipe) body: UpdateUserSchema,
+  ) {
     try {
       const { name, email } = body;
 
@@ -86,7 +106,7 @@ export class UsersController {
   }
 
   @Post()
-  async createUser(@Body() body: any) {
+  async createUser(@Body(createUserValidationPipe) body: CreateUserSchema) {
     try {
       const { name, email, password } = body;
 
@@ -123,7 +143,9 @@ export class UsersController {
 
   @Public()
   @Post('authenticate')
-  async authenticate(@Body() body: any) {
+  async authenticate(
+    @Body(authenticateValidationPipe) body: AuthenticateSchema,
+  ) {
     try {
       const { email, password } = body;
 

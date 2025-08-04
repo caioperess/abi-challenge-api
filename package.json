@@ -6,12 +6,14 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
+    "migrate": "prisma migrate dev",
     "build": "nest build",
     "start": "nest start",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
     "lint": "biome check --write",
+    "seed": "ts-node prisma/seed.ts",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
@@ -30,7 +32,8 @@
     "ioredis": "5.7.0",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
-    "zod": "^4.0.14"
+    "zod": "^4.0.14",
+    "zod-validation-error": "4.0.1"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.1.3",
